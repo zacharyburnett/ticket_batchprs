@@ -3,6 +3,7 @@ from peppyproject import PyProjectConfiguration
 import os
 import sys
 from getpass import getpass
+from pathlib import Path
 
 
 class PEP621(Updater):
@@ -14,20 +15,39 @@ class PEP621(Updater):
         # changes, and True if it was. This method should call self.add
         # to git add any files that have changed, but should not commit.
 
-        try:
-            configuration = PyProjectConfiguration.from_directory(".")
-            configuration.to_file("pyproject.toml")
+        filenames = [
+            filename
+            for filename in Path().cwd().iterdir()
+            if filename.is_file() and filename in ["setup.cfg", "setup.py"]
+        ]
 
-            if configuration._PyProjectConfiguration__tables.get("tool") is not None:
-                print(
-                    "`flake8` does not support `pyproject.toml`; you should use `ruff` instead.\nTo keep the `flake8` configuration, move it to an INI file called `.flake8`",
-                    file=sys.stderr,
-                )
+        if len(filenames) > 0:
+            try:
+                configuration = PyProjectConfiguration.from_directory(".")
+                configuration.to_file("pyproject.toml")
+
+                if (
+                    configuration._PyProjectConfiguration__tables.get("tool")
+                    is not None
+                ):
+                    print(
+                        "`flake8` does not support `pyproject.toml`; you should use `ruff` instead.\nTo keep the `flake8` configuration, move it to an INI file called `.flake8`",
+                        file=sys.stderr,
+                    )
+                    return False
+                os.remove("setup.cfg")
+
+                with open("setup.py", "r") as setup_py:
+                    if "Extension" in setup_py.read():
+                        print(
+                            "`setup.py` contains `Extension`; you will need to set up a shim `setup.py` to handle extensions",
+                            file=sys.stderr,
+                        )
+                        return False
+                os.remove("setup.py")
+            except:
                 return False
-            os.remove("setup.cfg")
-
-            os.remove("setup.py")
-        except:
+        else:
             return False
 
         return True
