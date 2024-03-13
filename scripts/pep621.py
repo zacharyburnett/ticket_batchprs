@@ -2,6 +2,7 @@ from batchpr import Updater
 from peppyproject import PyProjectConfiguration
 import os
 import sys
+from getpass import getpass
 
 
 class PEP621(Updater):
@@ -65,7 +66,11 @@ class PEP621(Updater):
 
 
 if __name__ == "__main__":
-    helper = PEP621(token=os.environ["GITHUB_TOKEN"])
+    GITHUB_TOKEN = getpass(
+        "enter GitHub token with permission to create forks, branches, and pull requests:"
+    )
+
+    helper = PEP621(token=GITHUB_TOKEN)
 
     repos = [
         "spacetelescope/jwst",

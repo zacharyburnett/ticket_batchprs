@@ -72,7 +72,11 @@ class BumpPython(Updater):
 
 
 if __name__ == "__main__":
-    helper = BumpPython(token=os.environ["GITHUB_TOKEN"])
+    GITHUB_TOKEN = getpass(
+        "enter GitHub token with permission to create forks, branches, and pull requests:"
+    )
+
+    helper = BumpPython(token=GITHUB_TOKEN)
 
     repos = [
         "spacetelescope/jwst",
