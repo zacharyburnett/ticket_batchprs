@@ -30,7 +30,7 @@ class BumpPythonMinorVersion(Updater):
                     "requires-python"
                 ].split(".")
             else:
-                required_python = ["3", "9"]
+                required_python = [">=3", "9"]
 
             if int(required_python[1]) <= PINNED_PYTHON_MINOR_VERSION - 1:
                 required_python[1] = str(PINNED_PYTHON_MINOR_VERSION)
