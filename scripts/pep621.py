@@ -96,5 +96,4 @@ if __name__ == "__main__":
         "spacetelescope/jwst",
     ]
 
-    for repo in repos:
-        helper.run(repo)
+    helper.run(repos)
