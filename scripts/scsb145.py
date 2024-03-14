@@ -25,24 +25,25 @@ class BumpPythonMinorVersion(Updater):
             with open("pyproject.toml", "rb") as pyproject_toml_file:
                 pyproject_metadata = tomllib.load(pyproject_toml_file)
 
-            if "requires-python" in pyproject_metadata["project"]:
-                required_python = pyproject_metadata["project"][
-                    "requires-python"
-                ].split(".")
-            else:
-                required_python = [">=3", "9"]
+            if "project" in pyproject_metadata:
+                if "requires-python" in pyproject_metadata["project"]:
+                    required_python = pyproject_metadata["project"][
+                        "requires-python"
+                    ].split(".")
+                else:
+                    required_python = [">=3", "9"]
 
-            if int(required_python[1]) <= PINNED_PYTHON_MINOR_VERSION - 1:
-                required_python[1] = str(PINNED_PYTHON_MINOR_VERSION)
-                pyproject_metadata["project"]["requires-python"] = ".".join(
-                    required_python
-                )
+                if int(required_python[1]) <= PINNED_PYTHON_MINOR_VERSION - 1:
+                    required_python[1] = str(PINNED_PYTHON_MINOR_VERSION)
+                    pyproject_metadata["project"]["requires-python"] = ".".join(
+                        required_python
+                    )
 
-                with open("pyproject.toml", "wb") as pyproject_toml_file:
-                    tomli_w.dump(pyproject_metadata, pyproject_toml_file)
-                self.add("pyproject.toml")
+                    with open("pyproject.toml", "wb") as pyproject_toml_file:
+                        tomli_w.dump(pyproject_metadata, pyproject_toml_file)
+                    self.add("pyproject.toml")
 
-                return True
+                    return True
 
         for filename in [Path("setup.cfg"), Path("setup.py")]:
             if filename.exists():
@@ -105,27 +106,27 @@ if __name__ == "__main__":
     helper = BumpPythonMinorVersion(token=GITHUB_TOKEN)
 
     repos = [
-        "spacetelescope/jwst",
-        "spacetelescope/romancal",
-        "spacetelescope/romanisim",
-        "spacetelescope/roman_datamodels",
-        "spacetelescope/drizzlepac",
-        "spacetelescope/tweakwcs",
-        "spacetelescope/stistools",
-        "spacetelescope/pysiaf",
-        "spacetelescope/jwql",
-        "spacetelescope/webbpsf",
-        "spacetelescope/stpipe",
-        "spacetelescope/statamodels",
-        "spacetelescope/gwcs",
-        "spacetelescope/stpreview",
-        "spacetelescope/poppy",
-        "spacetelescope/fitsblender",
-        "spacetelescope/stcal",
-        "spacetelescope/rad",
-        "spacetelescope/drizzle",
-        "spacetelescope/crds",
-        "spacetelescope/jdaviz",
+        # "spacetelescope/jwst",
+        # "spacetelescope/romancal",
+        # "spacetelescope/romanisim",
+        # "spacetelescope/roman_datamodels",
+        # "spacetelescope/drizzlepac",
+        # "spacetelescope/tweakwcs",
+        # "spacetelescope/stistools",
+        # "spacetelescope/pysiaf",
+        # "spacetelescope/jwql",
+        # "spacetelescope/webbpsf",
+        # "spacetelescope/stpipe",
+        "spacetelescope/stdatamodels",
+        # "spacetelescope/gwcs",
+        # "spacetelescope/stpreview",
+        # "spacetelescope/poppy",
+        # "spacetelescope/fitsblender",
+        # "spacetelescope/stcal",
+        # "spacetelescope/rad",
+        # "spacetelescope/drizzle",
+        # "spacetelescope/crds",
+        # "spacetelescope/jdaviz",
         "spacetelescope/imexam",
         "spacetelescope/pysynphot",
         "spacetelescope/cosmo",
@@ -133,7 +134,6 @@ if __name__ == "__main__":
         "spacetelescope/costools",
         "spacetelescope/stwcs",
         "spacetelescope/calcos",
-        "spacetelescope/fitsblender",
         "spacetelescope/psf",
     ]
 
