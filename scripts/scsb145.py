@@ -1,4 +1,5 @@
 from batchpr import Updater
+from getpass import getpass
 from peppyproject import PyProjectConfiguration
 import sys
 import os
