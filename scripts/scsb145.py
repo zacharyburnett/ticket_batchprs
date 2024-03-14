@@ -25,9 +25,12 @@ class BumpPythonMinorVersion(Updater):
             with open("pyproject.toml", "rb") as pyproject_toml_file:
                 pyproject_metadata = tomllib.load(pyproject_toml_file)
 
-            required_python = pyproject_metadata["project"]["requires-python"].split(
-                "."
-            )
+            if "requires-python" in pyproject_metadata["project"]:
+                required_python = pyproject_metadata["project"][
+                    "requires-python"
+                ].split(".")
+            else:
+                required_python = ["3", "9"]
 
             if int(required_python[1]) <= PINNED_PYTHON_MINOR_VERSION - 1:
                 required_python[1] = str(PINNED_PYTHON_MINOR_VERSION)
@@ -37,7 +40,7 @@ class BumpPythonMinorVersion(Updater):
 
                 with open("pyproject.toml", "wb") as pyproject_toml_file:
                     tomli_w.dump(pyproject_metadata, pyproject_toml_file)
-                self.add('pyproject.toml')
+                self.add("pyproject.toml")
 
                 return True
 
@@ -57,7 +60,7 @@ class BumpPythonMinorVersion(Updater):
                             line_parts[1] = ".".join(required_python)
                             lines[index] = "=".join(line_parts)
 
-                            with open(filename, 'w') as setup_file:
+                            with open(filename, "w") as setup_file:
                                 setup_file.writelines(lines)
                             self.add(filename)
 
@@ -103,6 +106,35 @@ if __name__ == "__main__":
 
     repos = [
         "spacetelescope/jwst",
+        "spacetelescope/romancal",
+        "spacetelescope/romanisim",
+        "spacetelescope/roman_datamodels",
+        "spacetelescope/drizzlepac",
+        "spacetelescope/tweakwcs",
+        "spacetelescope/stistools",
+        "spacetelescope/pysiaf",
+        "spacetelescope/jwql",
+        "spacetelescope/webbpsf",
+        "spacetelescope/stpipe",
+        "spacetelescope/statamodels",
+        "spacetelescope/gwcs",
+        "spacetelescope/stpreview",
+        "spacetelescope/poppy",
+        "spacetelescope/fitsblender",
+        "spacetelescope/stcal",
+        "spacetelescope/rad",
+        "spacetelescope/drizzle",
+        "spacetelescope/crds",
+        "spacetelescope/jdaviz",
+        "spacetelescope/imexam",
+        "spacetelescope/pysynphot",
+        "spacetelescope/cosmo",
+        "spacetelescope/wfpc2tools",
+        "spacetelescope/costools",
+        "spacetelescope/stwcs",
+        "spacetelescope/calcos",
+        "spacetelescope/fitsblender",
+        "spacetelescope/psf",
     ]
 
     helper.run(repos)
