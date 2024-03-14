@@ -1,11 +1,14 @@
 from batchpr import Updater
 from getpass import getpass
-from peppyproject import PyProjectConfiguration
-import sys
-import os
+import tomllib
+from pathlib import Path
+import tomli_w
 
 
-class BumpPython(Updater):
+PINNED_PYTHON_MINOR_VERSION = 10
+
+
+class BumpPythonMinorVersion(Updater):
     def process_repo(self):
         # This method should contain any code that you want to run inside
         # the repository to make the changes/updates. You can assume that
@@ -13,53 +16,72 @@ class BumpPython(Updater):
         # This method should return False if it was not able to make the
         # changes, and True if it was. This method should call self.add
         # to git add any files that have changed, but should not commit.
+
+        required_python = None
 
         pyproject_toml = Path("pyproject.toml")
+
         if pyproject_toml.exists():
             with open("pyproject.toml", "rb") as pyproject_toml_file:
-                pyproject_metadata = tomllib.read(pyproject_toml_file)
+                pyproject_metadata = tomllib.load(pyproject_toml_file)
 
-        setup_cfg = Path("setup.cfg")
-        if setup_cfg.exists():
-            pass
-
-    def process_repo(self):
-        # This method should contain any code that you want to run inside
-        # the repository to make the changes/updates. You can assume that
-        # the current working directory is the repository being processed.
-        # This method should return False if it was not able to make the
-        # changes, and True if it was. This method should call self.add
-        # to git add any files that have changed, but should not commit.
-        configuration = PyProjectConfiguration.from_directory(".")
-        configuration.to_file("pyproject.toml")
-
-        if configuration._PyProjectConfiguration__tables.get("tool") is not None:
-            print(
-                "`flake8` does not support `pyproject.toml`; you should use `ruff` instead.\nTo keep the `flake8` configuration, move it to an INI file called `.flake8`",
-                file=sys.stderr,
+            required_python = pyproject_metadata["project"]["requires-python"].split(
+                "."
             )
+
+            if int(required_python[1]) <= PINNED_PYTHON_MINOR_VERSION - 1:
+                required_python[1] = str(PINNED_PYTHON_MINOR_VERSION)
+                pyproject_metadata["project"]["requires-python"] = ".".join(
+                    required_python
+                )
+
+                with open("pyproject.toml", "wb") as pyproject_toml_file:
+                    tomli_w.dump(pyproject_metadata, pyproject_toml_file)
+                self.add('pyproject.toml')
+
+                return True
+
+        for filename in [Path("setup.cfg"), Path("setup.py")]:
+            if filename.exists():
+                with open(filename) as setup_file:
+                    lines = setup_file.readlines()
+
+                for index in range(len(lines)):
+                    line = lines[index]
+                    if "python_requires" in line:
+                        line_parts = line.split("=", maxsplit=1)
+                        required_python = line_parts[1].split(".")
+
+                        if int(required_python[1]) <= PINNED_PYTHON_MINOR_VERSION - 1:
+                            required_python[1] = str(PINNED_PYTHON_MINOR_VERSION)
+                            line_parts[1] = ".".join(required_python)
+                            lines[index] = "=".join(line_parts)
+
+                            with open(filename, 'w') as setup_file:
+                                setup_file.writelines(lines)
+                            self.add(filename)
+
+                            return True
+                        return False
+        return False
 
     @property
     def commit_message(self) -> str:
         # The commit message to use when making the changes
-        return "apply PEP621 to consolidate configuration into `pyproject.toml`"
+        return "require Python 3.10"
 
     @property
     def pull_request_title(self) -> str:
         # The title of the pull request
-        return "[PEP621] consolidate build configuration into `pyproject.toml`"
+        return "[SCSB-145] require Python 3.10"
 
     @property
     def pull_request_body(self) -> str:
         # The main body/description of the pull request
         return (
-            "`setuptools` now supports the `[project]` table, which is defined by [PEP621](https://peps.python.org/pep-0621).\n"
+            "resolves [SCSB-145](https://jira.stsci.edu/browse/SCSB-145)\n"
             "\n"
-            "Additionally, `setuptools` now supports its own entry in `pyproject.toml` called `[tool.setuptools]` (https://github.com/pypa/setuptools/issues/1688, https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html#setuptools-specific-configuration)\n"
-            "\n"
-            "Reading `toml` is supported natively in Python 3.11 with `tomllib`\n"
-            "\n"
-            "Given this, we can consolidate the build configuration into a single `pyproject.toml` file that can possibly be read by other build systems in the future."
+            "propagate Astropy's deprecation of Python 3.9 to downstream packages\n"
             "\n"
             "\n"
             "> [!NOTE]\n"
@@ -69,7 +91,7 @@ class BumpPython(Updater):
     @property
     def branch_name(self) -> str:
         # The name of the branch to use
-        return "pep621"
+        return "scsb145"
 
 
 if __name__ == "__main__":
@@ -77,7 +99,7 @@ if __name__ == "__main__":
         "enter GitHub token with permission to create forks, branches, and pull requests:"
     )
 
-    helper = BumpPython(token=GITHUB_TOKEN)
+    helper = BumpPythonMinorVersion(token=GITHUB_TOKEN)
 
     repos = [
         "spacetelescope/jwst",

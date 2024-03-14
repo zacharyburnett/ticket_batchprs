@@ -25,6 +25,7 @@ class PEP621(Updater):
             try:
                 configuration = PyProjectConfiguration.from_directory(".")
                 configuration.to_file("pyproject.toml")
+                self.add("pyproject.toml")
 
                 if (
                     configuration._PyProjectConfiguration__tables.get("tool")
@@ -36,6 +37,7 @@ class PEP621(Updater):
                     )
                     return False
                 os.remove("setup.cfg")
+                self.add("setup.cfg")
 
                 with open("setup.py", "r") as setup_py:
                     if "Extension" in setup_py.read():
@@ -45,6 +47,7 @@ class PEP621(Updater):
                         )
                         return False
                 os.remove("setup.py")
+                self.add("setup.py")
             except:
                 return False
         else:
