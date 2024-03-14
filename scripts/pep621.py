@@ -79,7 +79,7 @@ class PEP621(Updater):
             "\n"
             "\n"
             "> [!NOTE]\n"
-            "> This is an automated update made by the ``batchpr`` tool :robot: - feel free to close if it doesn't look good! You can report issues to @astrofrog."
+            "> this PR was generated automatically by ``batchpr`` :robot:"
         )
 
     @property
